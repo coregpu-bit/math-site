@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>원주율 π · 눈으로 배우는 수학</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header>
+  <a href="index.html">눈으로 배우는 수학</a>
+  <nav><a href="index.html">← 홈</a> <a href="pythagoras.html">← 피타고라스</a></nav>
+</header>
+<main>
+  <h1>원주율 π</h1>
+  <p class="lead">원주율은 <b>원의 둘레 ÷ 지름</b>입니다. 원이 크든 작든 이 비율은 언제나 같은 값,
+     <b>π ≈ 3.14159…</b> 가 됩니다. 세 가지 방법으로 직접 확인해 보세요.</p>
+
+  <h2>1. 원을 굴려서 둘레를 펴 보기</h2>
+  <p>지름이 1인 원을 한 바퀴 굴리면, 굴러간 거리가 곧 둘레입니다. 그 거리가 지름의 <b>몇 배</b>인지 보세요.</p>
+  <div class="stage">
+    <canvas id="roll" width="680" height="260"></canvas>
+    <div class="controls">
+      <button id="rollPlay">▶ 굴리기</button>
+      <button id="rollReset" class="secondary">처음으로</button>
+      <label>지름 <input type="range" id="dia" min="40" max="90" step="1" value="64"></label>
+    </div>
+    <div class="readout">굴러간 거리 ÷ 지름 = <span class="big" id="rollRatio">0.000</span>
+      <span class="hint"> (한 바퀴 다 굴리면 π에 도달)</span></div>
+  </div>
+
+  <h2>2. 다각형으로 원에 다가가기</h2>
+  <p>원 안과 밖에 정다각형을 그립니다. 변의 개수 <b>n</b>을 늘릴수록 다각형은 원에 가까워지고,
+     <b>둘레 ÷ 지름</b> 값이 위·아래에서 π를 좁혀 옵니다. (고대 아르키메데스의 방법!)</p>
+  <div class="stage">
+    <canvas id="poly" width="680" height="420"></canvas>
+    <div class="controls">
+      <label>변의 개수 n = <b id="nval">6</b> <input type="range" id="nsides" min="3" max="100" step="1" value="6"></label>
+    </div>
+    <div class="readout">
+      안쪽 다각형: <span id="pIn" class="tag-b">0</span> &lt; &nbsp;π ≈ 3.14159…&nbsp; &lt; <span id="pOut" class="tag-c">0</span> :바깥 다각형
+    </div>
+  </div>
+
+  <h2>3. 다트를 던져 π 구하기 (몬테카를로)</h2>
+  <p>정사각형 안에 무작위로 점을 뿌립니다. 원 안에 떨어진 점의 비율은 <b>원 넓이 ÷ 정사각형 넓이 = π/4</b> 에 가까워집니다.
+     점을 많이 던질수록 추정값이 π에 수렴합니다.</p>
+  <div class="stage">
+    <canvas id="mc" width="360" height="360" style="margin:auto;"></canvas>
+    <div class="controls">
+      <button id="mcStart">▶ 던지기 시작</button>
+      <button id="mcStop" class="secondary">멈춤</button>
+      <button id="mcReset" class="secondary">초기화</button>
+    </div>
+    <div class="readout">
+      던진 점 <span id="mcTotal">0</span> · 원 안 <span id="mcIn">0</span> →
+      π 추정값 = <span class="big" id="mcPi">0.000</span>
+    </div>
+  </div>
+</main>
+
+<script>
+const css=getComputedStyle(document.documentElement);
+const CB=css.getPropertyValue('--b').trim(), CC=css.getPropertyValue('--c').trim(), AC=css.getPropertyValue('--accent').trim();
+const PI=Math.PI;
+
+// ============ 1. 원 굴리기 ============
+(function(){
+  const cv=document.getElementById('roll'), ctx=cv.getContext('2d');
+  const play=document.getElementById('rollPlay'), reset=document.getElementById('rollReset');
+  const dia=document.getElementById('dia'), ratio=document.getElementById('rollRatio');
+  const baseY=190, startX=60;
+  let theta=0, anim=null;
+
+  function render(){
+    const d=+dia.value, r=d/2;
+    const dist=r*theta;                  // 굴러간 거리 = 반지름 * 회전각
+    const cx=startX+r+dist, cy=baseY-r;
+    ctx.clearRect(0,0,cv.width,cv.height);
+    // 바닥선
+    ctx.strokeStyle='#bbb'; ctx.lineWidth=2;
+    ctx.beginPath(); ctx.moveTo(startX,baseY); ctx.lineTo(cv.width-20,baseY); ctx.stroke();
+    // 지나온 둘레(빨간 선) — 시작점부터 접점까지
+    ctx.strokeStyle=CB; ctx.lineWidth=5;
+    ctx.beginPath(); ctx.moveTo(startX+r,baseY); ctx.lineTo(startX+r+dist,baseY); ctx.stroke();
+    // 지름 눈금 (지름 단위 점선)
+    ctx.strokeStyle='#ddd'; ctx.lineWidth=1;
+    for(let k=0;startX+r+k*d<=cv.width;k++){
+      const x=startX+r+k*d;
+      ctx.setLineDash([3,3]); ctx.beginPath(); ctx.moveTo(x,baseY); ctx.lineTo(x,baseY+14); ctx.stroke();
+      ctx.setLineDash([]); ctx.fillStyle='#999'; ctx.font='11px sans-serif'; ctx.textAlign='center';
+      ctx.fillText(k+'d', x, baseY+26);
+    }
+    // 원
+    ctx.beginPath(); ctx.arc(cx,cy,r,0,2*PI);
+    ctx.fillStyle=CC+'22'; ctx.fill(); ctx.strokeStyle=CC; ctx.lineWidth=2.5; ctx.stroke();
+    // 원 위의 표식점 (구르는 걸 보이게)
+    const px=cx+r*Math.sin(theta), py=cy+r*Math.cos(theta);
+    ctx.beginPath(); ctx.arc(px,py,5,0,2*PI); ctx.fillStyle='#dc2626'; ctx.fill();
+    // 중심-표식 반지름
+    ctx.strokeStyle=CC; ctx.lineWidth=1.5;
+    ctx.beginPath(); ctx.moveTo(cx,cy); ctx.lineTo(px,py); ctx.stroke();
+
+    // 굴러간 거리 ÷ 지름 = 한 바퀴 다 굴리면 π
+    ratio.textContent=(dist/d).toFixed(3);
+  }
+  function loop(){
+    theta+=0.03;
+    if(theta>=2*PI){ theta=2*PI; render(); cancelAnimationFrame(anim); anim=null; play.textContent='▶ 다시'; return; }
+    render(); anim=requestAnimationFrame(loop);
+  }
+  play.addEventListener('click',()=>{ if(anim)return; if(theta>=2*PI)theta=0; anim=requestAnimationFrame(loop); });
+  reset.addEventListener('click',()=>{ if(anim){cancelAnimationFrame(anim);anim=null;} theta=0; play.textContent='▶ 굴리기'; render(); });
+  dia.addEventListener('input',render);
+  render();
+})();
+
+// ============ 2. 다각형 근사 ============
+(function(){
+  const cv=document.getElementById('poly'), ctx=cv.getContext('2d');
+  const ns=document.getElementById('nsides'), nval=document.getElementById('nval');
+  const pIn=document.getElementById('pIn'), pOut=document.getElementById('pOut');
+  const cx=cv.width/2, cy=cv.height/2, R=160;
+
+  function poly(n,rad,color,fill){
+    ctx.beginPath();
+    for(let i=0;i<=n;i++){
+      const ang=-PI/2 + i*2*PI/n;
+      const x=cx+rad*Math.cos(ang), y=cy+rad*Math.sin(ang);
+      i? ctx.lineTo(x,y): ctx.moveTo(x,y);
+    }
+    if(fill){ctx.fillStyle=fill; ctx.fill();}
+    ctx.strokeStyle=color; ctx.lineWidth=2; ctx.stroke();
+  }
+  function render(){
+    const n=+ns.value; nval.textContent=n;
+    ctx.clearRect(0,0,cv.width,cv.height);
+    // 원 (지름 = 2R 기준)
+    ctx.beginPath(); ctx.arc(cx,cy,R,0,2*PI); ctx.strokeStyle='#999'; ctx.lineWidth=2; ctx.stroke();
+    // 외접 다각형: 변이 원에 접함 → 외접원 반지름 = R/cos(π/n)
+    poly(n, R/Math.cos(PI/n), CC, null);
+    // 내접 다각형: 꼭짓점이 원 위 → 반지름 R
+    poly(n, R, CB, CB+'18');
+
+    // 둘레/지름  (지름 = 2R)
+    const inPerim = n*2*R*Math.sin(PI/n);          // 내접 둘레
+    const outPerim= n*2*R*Math.tan(PI/n);          // 외접 둘레
+    const d=2*R;
+    pIn.textContent=(inPerim/d).toFixed(5);
+    pOut.textContent=(outPerim/d).toFixed(5);
+  }
+  ns.addEventListener('input',render);
+  render();
+})();
+
+// ============ 3. 몬테카를로 ============
+(function(){
+  const cv=document.getElementById('mc'), ctx=cv.getContext('2d');
+  const startB=document.getElementById('mcStart'), stopB=document.getElementById('mcStop'), resetB=document.getElementById('mcReset');
+  const tEl=document.getElementById('mcTotal'), iEl=document.getElementById('mcIn'), piEl=document.getElementById('mcPi');
+  const S=cv.width, R=S/2;
+  let total=0, inside=0, anim=null;
+
+  function base(){
+    ctx.clearRect(0,0,S,S);
+    ctx.strokeStyle='#bbb'; ctx.lineWidth=2; ctx.strokeRect(1,1,S-2,S-2);
+    ctx.beginPath(); ctx.arc(R,R,R-1,0,2*PI); ctx.strokeStyle=AC; ctx.lineWidth=2; ctx.stroke();
+  }
+  function step(){
+    for(let k=0;k<80;k++){
+      const x=Math.random()*S, y=Math.random()*S;
+      const inCircle=Math.hypot(x-R,y-R)<=R;
+      if(inCircle) inside++;
+      total++;
+      ctx.fillStyle=inCircle? '#16a34a' : '#dc2626';
+      ctx.fillRect(x,y,2,2);
+    }
+    tEl.textContent=total; iEl.textContent=inside;
+    piEl.textContent=(4*inside/total).toFixed(4);
+    anim=requestAnimationFrame(step);
+  }
+  startB.addEventListener('click',()=>{ if(!anim) anim=requestAnimationFrame(step); });
+  stopB.addEventListener('click',()=>{ if(anim){cancelAnimationFrame(anim); anim=null;} });
+  resetB.addEventListener('click',()=>{ if(anim){cancelAnimationFrame(anim);anim=null;} total=0;inside=0; tEl.textContent=0;iEl.textContent=0;piEl.textContent='0.000'; base(); });
+  base();
+})();
+</script>
+</body>
+</html>
