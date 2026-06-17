@@ -5,6 +5,6 @@
   "description": "눈으로 배우는 수업 — 인터랙티브 수학·과학 학습 사이트",
   "type": "module",
   "dependencies": {
-    "@anthropic-ai/sdk": "^0.104.2"
+    "@google/genai": "^2.8.0"
   }
 }

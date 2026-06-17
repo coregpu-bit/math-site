@@ -1,9 +1,9 @@
-import Anthropic from "@anthropic-ai/sdk";
+import { GoogleGenAI } from "@google/genai";
 
-// Vercel 서버리스 함수 — 학생 질문을 받아 Claude로 답한다.
-// API 키는 서버 환경변수(ANTHROPIC_API_KEY)에서만 읽는다. 절대 브라우저로 노출하지 않는다.
+// Vercel 서버리스 함수 — 학생 질문을 받아 Google Gemini로 답한다.
+// API 키는 서버 환경변수(GEMINI_API_KEY)에서만 읽는다. 절대 브라우저로 노출하지 않는다.
 
-const client = new Anthropic(); // ANTHROPIC_API_KEY 환경변수를 자동으로 사용
+const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 
 const TOPIC_CONTEXT = {
   pythagoras: "지금 학생은 '피타고라스의 정리(a² + b² = c²)' 페이지를 보고 있습니다.",
@@ -42,26 +42,22 @@ export default async function handler(req, res) {
 
     const context = TOPIC_CONTEXT[topic] || TOPIC_CONTEXT.general;
 
-    const response = await client.messages.create({
-      model: "claude-opus-4-8",
-      max_tokens: 2000,
-      thinking: { type: "adaptive" },
-      system: SYSTEM_PROMPT,
-      messages: [
-        { role: "user", content: `${context}\n\n학생 질문: ${question.trim()}` },
-      ],
+    const response = await ai.models.generateContent({
+      model: "gemini-2.5-flash",
+      contents: `${context}\n\n학생 질문: ${question.trim()}`,
+      config: {
+        systemInstruction: SYSTEM_PROMPT,
+        maxOutputTokens: 2000,
+      },
     });
 
-    const answer = response.content
-      .filter((b) => b.type === "text")
-      .map((b) => b.text)
-      .join("\n")
-      .trim();
+    const answer = (response.text || "").trim();
 
     res.status(200).json({ answer: answer || "답변을 생성하지 못했어요. 다시 시도해 주세요." });
   } catch (err) {
     console.error("ask handler error:", err);
-    if (err instanceof Anthropic.RateLimitError) {
+    const status = err && (err.status || err.code);
+    if (status === 429) {
       res.status(429).json({ error: "지금 질문이 많아요. 잠시 후 다시 시도해 주세요." });
     } else {
       res.status(500).json({ error: "답변을 가져오는 중 문제가 생겼어요. 잠시 후 다시 시도해 주세요." });
