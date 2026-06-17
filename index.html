@@ -3,27 +3,78 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>눈으로 배우는 수학</title>
+<title>눈으로 배우는 수업</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
 <header>
-  <a href="index.html">눈으로 배우는 수학</a>
-  <nav>직접 만지고 움직이면서 원리를 익히는 인터랙티브 수학</nav>
+  <a class="brand" href="index.html"><span class="mark">✦</span> 눈으로 배우는 수업</a>
+  <nav>직접 만지고 움직이면서 원리를 익히는 인터랙티브 수업</nav>
 </header>
 <main>
   <h1>주제를 골라보세요</h1>
   <p class="lead">공식을 외우는 대신, 슬라이더를 움직이고 도형을 끌어보며 "왜 그런지"를 눈으로 확인합니다.</p>
 
-  <a class="card" href="pythagoras.html">
-    <h3>피타고라스의 정리</h3>
-    <p>직각삼각형의 두 변을 직접 끌어보면서 a² + b² = c² 가 항상 성립하는 이유를, 넓이를 옮겨 담는 애니메이션으로 확인합니다.</p>
-  </a>
+  <div class="cards">
 
-  <a class="card" href="pi.html">
-    <h3>원주율 (π)</h3>
-    <p>원을 굴려 둘레를 펴 보고, 다각형의 변을 늘려가며 원에 다가가는 과정을 통해 π ≈ 3.14159… 가 나오는 과정을 체험합니다.</p>
-  </a>
+    <a class="card" href="pythagoras.html" style="--card-accent:#16a34a; --card-bg:#f0fdf4;">
+      <div class="thumb">
+        <svg viewBox="0 0 240 132" xmlns="http://www.w3.org/2000/svg">
+          <rect x="60" y="74" width="44" height="44" fill="#16a34a22" stroke="#16a34a" stroke-width="2"/>
+          <rect x="16" y="30" width="44" height="44" fill="#ea580c22" stroke="#ea580c" stroke-width="2"/>
+          <polygon points="60,74 104,74 60,30" fill="#fff" stroke="#333" stroke-width="2.5"/>
+          <line x1="60" y1="74" x2="104" y2="30" stroke="#2563eb" stroke-width="3"/>
+          <text x="82" y="92" font-size="13" fill="#16a34a" text-anchor="middle">a²</text>
+          <text x="38" y="56" font-size="13" fill="#ea580c" text-anchor="middle">b²</text>
+          <text x="92" y="48" font-size="13" fill="#2563eb">c</text>
+        </svg>
+      </div>
+      <div class="body">
+        <h3><span class="badge-num">1</span> 피타고라스의 정리</h3>
+        <p>직각삼각형의 두 변을 직접 끌어보면서 a² + b² = c² 가 항상 성립하는 이유를, 넓이를 옮겨 담는 애니메이션으로 확인합니다.</p>
+      </div>
+    </a>
+
+    <a class="card" href="pi.html" style="--card-accent:#2563eb; --card-bg:#eff6ff;">
+      <div class="thumb">
+        <svg viewBox="0 0 240 132" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="120" cy="66" r="46" fill="#2563eb12" stroke="#2563eb" stroke-width="2.5"/>
+          <line x1="74" y1="66" x2="166" y2="66" stroke="#db2777" stroke-width="2" stroke-dasharray="4 3"/>
+          <text x="120" y="58" font-size="34" fill="#2563eb" text-anchor="middle" font-style="italic">π</text>
+          <text x="120" y="86" font-size="11" fill="#db2777" text-anchor="middle">지름</text>
+        </svg>
+      </div>
+      <div class="body">
+        <h3><span class="badge-num">2</span> 원주율 (π)</h3>
+        <p>원을 굴려 둘레를 펴 보고, 다각형의 변을 늘려가며 원에 다가가는 과정을 통해 π ≈ 3.14159… 가 나오는 과정을 체험합니다.</p>
+      </div>
+    </a>
+
+    <a class="card" href="astronomy.html" style="--card-accent:#7c3aed; --card-bg:#0b1020;">
+      <div class="thumb">
+        <svg viewBox="0 0 240 132" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="40" cy="66" r="22" fill="#f59e0b"/>
+          <circle cx="40" cy="66" r="30" fill="none" stroke="#fbbf2455" stroke-width="6"/>
+          <circle cx="150" cy="66" r="60" fill="none" stroke="#ffffff22" stroke-width="1"/>
+          <circle cx="150" cy="66" r="14" fill="#2563eb" stroke="#93c5fd" stroke-width="1.5"/>
+          <circle cx="186" cy="66" r="5" fill="#d1d5db"/>
+          <g fill="#ffffff66">
+            <circle cx="100" cy="20" r="1.4"/><circle cx="210" cy="30" r="1.4"/>
+            <circle cx="120" cy="112" r="1.4"/><circle cx="80" cy="100" r="1.4"/>
+            <circle cx="200" cy="100" r="1.4"/>
+          </g>
+        </svg>
+      </div>
+      <div class="body">
+        <h3><span class="badge-num">3</span> 태양·지구·달</h3>
+        <p>지구의 공전·자전과 달의 운동으로 일어나는 일식·월식, 그리고 달의 인력이 만드는 만조·간조의 원리를 직접 돌려보며 익힙니다.</p>
+      </div>
+    </a>
+
+  </div>
 
   <p class="hint">팁: 각 페이지의 슬라이더와 버튼을 자유롭게 움직여 보세요. 숫자는 실시간으로 바뀝니다.</p>
 </main>

@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>태양·지구·달 · 눈으로 배우는 수업</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<style>
+  .sun{color:#f59e0b;font-weight:700}
+  .earth{color:#2563eb;font-weight:700}
+  .moon{color:#6b7280;font-weight:700}
+  .badge{display:inline-block;padding:2px 10px;border-radius:999px;font-size:14px;font-weight:700}
+  .badge.none{background:#eee;color:#666}
+  .badge.solar{background:#fde68a;color:#92400e}
+  .badge.lunar{background:#c7d2fe;color:#3730a3}
+  .badge.high{background:#bae6fd;color:#075985}
+  .badge.low{background:#fde68a;color:#92400e}
+</style>
+</head>
+<body>
+<header>
+  <a class="brand" href="index.html"><span class="mark">✦</span> 눈으로 배우는 수업</a>
+  <nav><a href="index.html">← 홈</a> <a href="pythagoras.html">피타고라스</a> <a href="pi.html">원주율</a></nav>
+</header>
+<main>
+  <h1>태양·지구·달</h1>
+  <p class="lead"><span class="sun">태양</span>을 중심으로 <span class="earth">지구</span>가 공전하고, 지구 둘레를 <span class="moon">달</span>이 돕니다.
+     이 세 천체의 움직임에서 <b>일식·월식</b>과 <b>밀물·썰물(만조·간조)</b>이 어떻게 생기는지 직접 돌려보며 익혀봅시다.</p>
+
+  <h2>1. 공전과 자전</h2>
+  <p><b>공전(公轉)</b>은 한 천체가 다른 천체 둘레를 도는 것, <b>자전(自轉)</b>은 천체가 스스로 도는 것입니다.
+     지구의 밝은 쪽이 낮, 어두운 쪽이 밤입니다. 빨간 점(내가 있는 곳)이 자전으로 낮↔밤을 오가는 것을 보세요.</p>
+  <div class="stage">
+    <canvas id="orbit" width="680" height="480"></canvas>
+    <div class="controls">
+      <button id="oPlay">⏸ 멈춤</button>
+      <label>속도 <input type="range" id="oSpeed" min="0.2" max="3" step="0.1" value="1"></label>
+      <label><input type="checkbox" id="oTrail" checked> 공전 궤도 표시</label>
+    </div>
+    <p class="hint">달도 지구를 공전하면서 같은 면만 지구를 향합니다(달의 자전 주기 = 공전 주기).</p>
+  </div>
+
+  <h2>2. 일식과 월식</h2>
+  <p>해·달이 지구와 <b>일직선</b>으로 늘어설 때 생깁니다. 달의 위치 슬라이더를 움직여 일직선을 만들어 보세요.</p>
+  <ul>
+    <li><b class="badge solar">일식</b> <span class="moon">달</span>이 <span class="sun">태양</span>과 <span class="earth">지구</span> <b>사이</b>에 들어와 햇빛을 가림 (태양 – 달 – 지구).</li>
+    <li><b class="badge lunar">월식</b> <span class="earth">지구</span>가 <span class="sun">태양</span>과 <span class="moon">달</span> <b>사이</b>에 들어와 지구 그림자가 달을 덮음 (태양 – 지구 – 달).</li>
+  </ul>
+  <div class="stage">
+    <canvas id="eclipse" width="680" height="360"></canvas>
+    <div class="controls">
+      <label>달의 위치 <input type="range" id="eAngle" min="0" max="360" step="1" value="60"></label>
+      <button id="eSolar" class="secondary">일식 위치로</button>
+      <button id="eLunar" class="secondary">월식 위치로</button>
+    </div>
+    <div class="readout">현재 상태: <span id="eState" class="badge none">없음</span>
+      <span class="hint" id="eHint"> — 달을 태양–지구 일직선 위로 옮겨 보세요.</span></div>
+  </div>
+
+  <h2>3. 밀물과 썰물 (만조·간조)</h2>
+  <p>달의 <b>인력</b>이 바닷물을 끌어당겨, 달을 향한 쪽과 그 반대쪽 바다가 부풀어 오릅니다(<span class="badge high">만조</span>).
+     그 사이 90° 지점은 물이 빠집니다(<span class="badge low">간조</span>).
+     지구가 하루 한 바퀴 <b>자전</b>하므로, 한 곳은 하루에 만조·간조를 <b>각각 두 번씩</b> 겪습니다.</p>
+  <div class="stage">
+    <canvas id="tide" width="680" height="420"></canvas>
+    <div class="controls">
+      <button id="tPlay">⏸ 멈춤</button>
+      <label>자전 속도 <input type="range" id="tSpeed" min="0.2" max="3" step="0.1" value="1"></label>
+    </div>
+    <div class="readout">내가 있는 곳(빨간 점)의 바닷물 높이: <span id="tState" class="badge low">—</span>
+      <span class="hint"> · 그래프가 두 개의 봉우리(만조)를 그립니다.</span></div>
+  </div>
+</main>
+
+<script>
+const TAU=Math.PI*2;
+function disc(ctx,x,y,r,fill,stroke){
+  ctx.beginPath();ctx.arc(x,y,r,0,TAU);
+  if(fill){ctx.fillStyle=fill;ctx.fill();}
+  if(stroke){ctx.strokeStyle=stroke;ctx.lineWidth=2;ctx.stroke();}
+}
+function text(ctx,t,x,y,color,size,align){
+  ctx.fillStyle=color||'#333';ctx.font=(size||13)+'px sans-serif';
+  ctx.textAlign=align||'center';ctx.textBaseline='middle';ctx.fillText(t,x,y);
+}
+
+// ===================== 1. 공전 & 자전 =====================
+(function(){
+  const cv=document.getElementById('orbit'),ctx=cv.getContext('2d');
+  const play=document.getElementById('oPlay'),speed=document.getElementById('oSpeed'),trail=document.getElementById('oTrail');
+  const cx=cv.width/2, cy=cv.height/2, RE=160, RM=46;
+  let tE=0, tM=0, spin=0, running=true, anim=null;
+
+  function render(){
+    ctx.fillStyle='#0b1020'; ctx.fillRect(0,0,cv.width,cv.height);
+    // 별
+    ctx.fillStyle='#ffffff22';
+    for(let i=0;i<60;i++){const x=(i*97)%cv.width,y=(i*53)%cv.height;ctx.fillRect(x,y,1.5,1.5);}
+    // 공전 궤도
+    if(trail.checked){ctx.strokeStyle='#ffffff22';ctx.lineWidth=1;ctx.beginPath();ctx.arc(cx,cy,RE,0,TAU);ctx.stroke();}
+    // 태양
+    const g=ctx.createRadialGradient(cx,cy,4,cx,cy,34);
+    g.addColorStop(0,'#fff6cc');g.addColorStop(.5,'#fbbf24');g.addColorStop(1,'#f59e0b00');
+    disc(ctx,cx,cy,34,g,null);
+    disc(ctx,cx,cy,20,'#f59e0b',null);
+    text(ctx,'태양',cx,cy+38,'#fcd34d',13);
+
+    // 지구 위치
+    const ex=cx+RE*Math.cos(tE), ey=cy+RE*Math.sin(tE);
+    // 달 공전 궤도
+    if(trail.checked){ctx.strokeStyle='#ffffff22';ctx.beginPath();ctx.arc(ex,ey,RM,0,TAU);ctx.stroke();}
+
+    // 지구: 태양을 향한 반쪽이 낮(밝음)
+    const er=15;
+    // 밝은 반구 (태양 방향)
+    const sunDir=Math.atan2(cy-ey,cx-ex);
+    ctx.save();
+    ctx.beginPath();ctx.arc(ex,ey,er,0,TAU);ctx.clip();
+    disc(ctx,ex,ey,er,'#1e3a5f',null);                 // 밤
+    ctx.beginPath();ctx.arc(ex,ey,er,sunDir-Math.PI/2,sunDir+Math.PI/2);ctx.closePath();
+    ctx.fillStyle='#3b82f6';ctx.fill();                 // 낮
+    ctx.restore();
+    disc(ctx,ex,ey,er,null,'#93c5fd');
+    text(ctx,'지구',ex,ey-er-10,'#93c5fd',12);
+
+    // 내가 있는 곳(자전하는 빨간 점)
+    const px=ex+er*Math.cos(spin), py=ey+er*Math.sin(spin);
+    disc(ctx,px,py,3.5,'#ef4444',null);
+
+    // 달
+    const mx=ex+RM*Math.cos(tM), my=ey+RM*Math.sin(tM);
+    disc(ctx,mx,my,6,'#d1d5db','#9ca3af');
+    text(ctx,'달',mx,my-12,'#d1d5db',11);
+  }
+  function loop(){
+    const s=+speed.value;
+    tE+=0.004*s; tM+=0.05*s; spin+=0.06*s;
+    render();
+    if(running) anim=requestAnimationFrame(loop);
+  }
+  play.addEventListener('click',()=>{
+    running=!running;
+    play.textContent=running?'⏸ 멈춤':'▶ 재생';
+    if(running&&!anim){anim=requestAnimationFrame(loop);}
+    else if(!running&&anim){cancelAnimationFrame(anim);anim=null;}
+  });
+  trail.addEventListener('change',render);
+  anim=requestAnimationFrame(loop);
+})();
+
+// ===================== 2. 일식 & 월식 =====================
+(function(){
+  const cv=document.getElementById('eclipse'),ctx=cv.getContext('2d');
+  const ang=document.getElementById('eAngle');
+  const state=document.getElementById('eState'),hint=document.getElementById('eHint');
+  const bSolar=document.getElementById('eSolar'),bLunar=document.getElementById('eLunar');
+  const sun={x:70,y:180,r:34}, earth={x:470,y:180,r:26}, RM=110;
+  // 각도 0 = 지구 기준 태양 반대편(오른쪽), 180 = 태양 쪽(왼쪽)
+
+  function render(){
+    const a=+ang.value*Math.PI/180;
+    // 달 위치: 지구 중심에서 각도 a (0°=오른쪽=태양반대, 180°=왼쪽=태양쪽)
+    const mx=earth.x+RM*Math.cos(a), my=earth.y-RM*Math.sin(a);
+
+    ctx.fillStyle='#0b1020';ctx.fillRect(0,0,cv.width,cv.height);
+    // 햇빛(평행광) 표현
+    ctx.strokeStyle='#fbbf2433';ctx.lineWidth=1;
+    for(let y=40;y<cv.height-20;y+=22){ctx.beginPath();ctx.moveTo(sun.x+sun.r,y);ctx.lineTo(cv.width,y);ctx.stroke();}
+
+    // 태양
+    const g=ctx.createRadialGradient(sun.x,sun.y,4,sun.x,sun.y,sun.r+10);
+    g.addColorStop(0,'#fff6cc');g.addColorStop(.6,'#fbbf24');g.addColorStop(1,'#f59e0b00');
+    disc(ctx,sun.x,sun.y,sun.r+10,g,null);disc(ctx,sun.x,sun.y,sun.r,'#f59e0b',null);
+    text(ctx,'태양',sun.x,sun.y+sun.r+16,'#fcd34d',13);
+
+    // 달 공전 궤도
+    ctx.strokeStyle='#ffffff20';ctx.beginPath();ctx.arc(earth.x,earth.y,RM,0,TAU);ctx.stroke();
+
+    // 정렬 판정 (달이 태양–지구 선, 즉 수평선 y≈earth.y 에 가까운가)
+    const dy=Math.abs(my-earth.y);
+    const onLine=dy<14;
+    const sunSide=mx<earth.x;          // 달이 태양 쪽(왼쪽)인가
+    let kind='none';
+    if(onLine && sunSide) kind='solar';
+    else if(onLine && !sunSide) kind='lunar';
+
+    // 지구 그림자 (태양 반대쪽=오른쪽으로 뻗음)
+    ctx.fillStyle='#00000000';
+    ctx.save();
+    ctx.fillStyle='rgba(40,40,60,.55)';
+    ctx.beginPath();
+    ctx.moveTo(earth.x,earth.y-earth.r);
+    ctx.lineTo(cv.width,earth.y-earth.r-6);
+    ctx.lineTo(cv.width,earth.y+earth.r+6);
+    ctx.lineTo(earth.x,earth.y+earth.r);
+    ctx.closePath();ctx.fill();
+    ctx.restore();
+
+    // 달 그림자 (일식일 때 지구로 향함=왼→오른쪽으로 뻗음)
+    if(sunSide){
+      ctx.save();ctx.fillStyle='rgba(20,20,30,.5)';
+      ctx.beginPath();
+      ctx.moveTo(mx,my-7);ctx.lineTo(earth.x+earth.r,earth.y-4);
+      ctx.lineTo(earth.x+earth.r,earth.y+4);ctx.lineTo(mx,my+7);
+      ctx.closePath();ctx.fill();ctx.restore();
+    }
+
+    // 지구
+    disc(ctx,earth.x,earth.y,earth.r,'#2563eb','#93c5fd');
+    text(ctx,'지구',earth.x,earth.y+earth.r+16,'#93c5fd',13);
+
+    // 달
+    let moonColor='#d1d5db';
+    if(kind==='lunar') moonColor='#b91c1c';  // 월식: 붉은 달
+    disc(ctx,mx,my,9,moonColor,'#9ca3af');
+    text(ctx,'달',mx,my-15,'#d1d5db',11);
+
+    // 일식: 태양 위에 가려짐 표시
+    if(kind==='solar'){
+      ctx.save();ctx.globalAlpha=.85;disc(ctx,sun.x,sun.y,sun.r*0.9,'#222',null);ctx.restore();
+    }
+
+    // 상태 배지
+    if(kind==='solar'){state.className='badge solar';state.textContent='일식 (Solar eclipse)';
+      hint.textContent=' — 태양 – 달 – 지구 일직선! 달이 해를 가립니다.';}
+    else if(kind==='lunar'){state.className='badge lunar';state.textContent='월식 (Lunar eclipse)';
+      hint.textContent=' — 태양 – 지구 – 달 일직선! 지구 그림자가 달을 덮어 붉게 보입니다.';}
+    else{state.className='badge none';state.textContent='없음';
+      hint.textContent=' — 달을 태양–지구 일직선(수평선) 위로 옮겨 보세요.';}
+  }
+  ang.addEventListener('input',render);
+  bSolar.addEventListener('click',()=>{ang.value=180;render();});
+  bLunar.addEventListener('click',()=>{ang.value=0;render();});
+  render();
+})();
+
+// ===================== 3. 만조 & 간조 =====================
+(function(){
+  const cv=document.getElementById('tide'),ctx=cv.getContext('2d');
+  const play=document.getElementById('tPlay'),speed=document.getElementById('tSpeed');
+  const state=document.getElementById('tState');
+  const cx=210, cy=200, R=70;        // 지구
+  const moonAng=0;                   // 달은 오른쪽(0°)에 고정
+  const moon={x:cx+170,y:cy,r:12};
+  let spin=0, running=true, anim=null;
+  const graph=[];                    // 조석 높이 기록 (스크롤 그래프)
+
+  function tideHeight(phi){
+    // 달 축(0° 및 180°)에서 최대, 90°/270°에서 최소 → cos(2θ)
+    return Math.cos(2*(phi-moonAng));
+  }
+
+  function render(){
+    ctx.fillStyle='#0b1020';ctx.fillRect(0,0,cv.width,cv.height);
+    // 달
+    disc(ctx,moon.x,moon.y,moon.r,'#d1d5db','#9ca3af');
+    text(ctx,'달',moon.x,moon.y-moon.r-8,'#d1d5db',12);
+    // 달의 인력 화살표
+    ctx.strokeStyle='#9ca3af66';ctx.lineWidth=1.5;
+    for(let dy=-40;dy<=40;dy+=20){
+      ctx.beginPath();ctx.moveTo(cx+R+50,cy+dy);ctx.lineTo(cx+R+18,cy+dy*0.7);ctx.stroke();
+    }
+
+    // 바닷물 (달 축으로 부푼 타원) — 과장 표현
+    const bulge=22;
+    ctx.beginPath();
+    for(let i=0;i<=72;i++){
+      const th=i/72*TAU;
+      const rr=R+12+bulge*tideHeight(th);
+      const x=cx+rr*Math.cos(th), y=cy-rr*Math.sin(th);
+      i?ctx.lineTo(x,y):ctx.moveTo(x,y);
+    }
+    ctx.closePath();
+    ctx.fillStyle='rgba(56,130,246,.45)';ctx.fill();
+    ctx.strokeStyle='#3b82f6';ctx.lineWidth=2;ctx.stroke();
+
+    // 지구(육지)
+    disc(ctx,cx,cy,R,'#15803d','#166534');
+    disc(ctx,cx,cy,R*0.62,'#22a35a',null);
+    text(ctx,'지구',cx,cy,'#eafff0',13);
+
+    // 내가 있는 곳 (자전하는 점)
+    const phi=spin;
+    const h=tideHeight(phi);
+    const rr=R+12+bulge*h;
+    const px=cx+rr*Math.cos(phi), py=cy-rr*Math.sin(phi);
+    // 점에서 지구표면까지 선
+    ctx.strokeStyle='#ef444488';ctx.lineWidth=1;
+    ctx.beginPath();ctx.moveTo(cx+R*Math.cos(phi),cy-R*Math.sin(phi));ctx.lineTo(px,py);ctx.stroke();
+    disc(ctx,px,py,5,'#ef4444',null);
+
+    // 만조/간조 배지
+    if(h>0.45){state.className='badge high';state.textContent='만조 (밀물)';}
+    else if(h<-0.45){state.className='badge low';state.textContent='간조 (썰물)';}
+    else{state.className='badge';state.style.background='#e5e7eb';state.style.color='#555';state.textContent='변화 중';}
+
+    // 조석 그래프 (오른쪽 영역)
+    const gx=400,gy=70,gw=255,gh=260;
+    ctx.strokeStyle='#ffffff22';ctx.lineWidth=1;
+    ctx.strokeRect(gx,gy,gw,gh);
+    text(ctx,'시간 →  나의 바닷물 높이',gx+gw/2,gy-12,'#94a3b8',12);
+    // 중앙선
+    ctx.strokeStyle='#ffffff15';ctx.beginPath();ctx.moveTo(gx,gy+gh/2);ctx.lineTo(gx+gw,gy+gh/2);ctx.stroke();
+    text(ctx,'만조',gx-2,gy+18,'#7dd3fc',11,'right');
+    text(ctx,'간조',gx-2,gy+gh-18,'#fcd34d',11,'right');
+    // 곡선
+    ctx.strokeStyle='#38bdf8';ctx.lineWidth=2;ctx.beginPath();
+    graph.forEach((v,i)=>{
+      const x=gx+ (i/ (graph.length-1||1))*gw;
+      const y=gy+gh/2 - v*(gh/2-12);
+      i?ctx.lineTo(x,y):ctx.moveTo(x,y);
+    });
+    ctx.stroke();
+    // 현재값 점
+    if(graph.length){
+      const x=gx+gw, y=gy+gh/2 - h*(gh/2-12);
+      disc(ctx,x,y,4,'#ef4444',null);
+    }
+  }
+  function loop(){
+    const s=+speed.value;
+    spin+=0.03*s;
+    graph.push(tideHeight(spin));
+    if(graph.length>180) graph.shift();
+    render();
+    if(running) anim=requestAnimationFrame(loop);
+  }
+  play.addEventListener('click',()=>{
+    running=!running;play.textContent=running?'⏸ 멈춤':'▶ 재생';
+    if(running&&!anim)anim=requestAnimationFrame(loop);
+    else if(!running&&anim){cancelAnimationFrame(anim);anim=null;}
+  });
+  anim=requestAnimationFrame(loop);
+})();
+</script>
+</body>
+</html>
