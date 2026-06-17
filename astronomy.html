@@ -73,6 +73,8 @@
     <div class="readout">내가 있는 곳(빨간 점)의 바닷물 높이: <span id="tState" class="badge low">—</span>
       <span class="hint"> · 그래프가 두 개의 봉우리(만조)를 그립니다.</span></div>
   </div>
+  <h2>궁금한 점이 있나요?</h2>
+  <div id="tutor"></div>
 </main>
 
 <script>
@@ -336,5 +338,7 @@ function text(ctx,t,x,y,color,size,align){
   anim=requestAnimationFrame(loop);
 })();
 </script>
+<script>window.TUTOR_TOPIC = "astronomy";</script>
+<script src="tutor.js"></script>
 </body>
 </html>
